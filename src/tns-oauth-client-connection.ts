@@ -1,6 +1,7 @@
 import * as querystring from "querystring";
 import * as URL from "url";
-import * as http from "@nativescript/core/http";
+
+import { Http, HttpResponse, HttpRequestOptions } from "@nativescript/core";
 
 import {
   TnsOaOpenIdProviderOptions,
@@ -14,7 +15,7 @@ const accessTokenName = "access_token";
 
 export class TnsOAuthClientConnection {
   private _client: TnsOAuthClient;
-  private _request: http.HttpRequestOptions;
+  private _request: HttpRequestOptions;
   private _completion: TnsOAuthResponseBlock;
 
   private _customHeaders: any;
@@ -93,27 +94,25 @@ export class TnsOAuthClientConnection {
       token: this.client.tokenResult.refreshToken
     });
 
-    http
-      .request({
-        url: revokeUrl,
-        method: "POST",
-        headers: headers,
-        content: body
-      })
-      .then(
-        (response: http.HttpResponse) => {
-          if (response.statusCode !== 200) {
-            this.completion(
-              null,
-              response,
-              new Error(`Failed logout with status ${response.statusCode}.`)
-            );
-          } else {
-            this.completion(null, response, null);
-          }
-        },
-        error => this.completion(null, null, error)
-      );
+    Http.request({
+      url: revokeUrl,
+      method: "POST",
+      headers: headers,
+      content: body,
+    }).then(
+      (response: HttpResponse) => {
+        if (response.statusCode !== 200) {
+          this.completion(
+            null,
+            response,
+            new Error(`Failed logout with status ${response.statusCode}.`)
+          );
+        } else {
+          this.completion(null, response, null);
+        }
+      },
+      (error) => this.completion(null, null, error)
+    );
   }
 
   public startTokenRefresh() {
@@ -146,29 +145,27 @@ export class TnsOAuthClientConnection {
         });
     }
 
-    http
-      .request({
-        url: tokenUrl,
-        method: "POST",
-        headers: headers,
-        content: body
-      })
-      .then(
-        (response: http.HttpResponse) => {
-          if (response.statusCode !== 200) {
-            this.completion(
-              null,
-              response,
-              new Error(
-                `Failed refresh token with status ${response.statusCode}.`
-              )
-            );
-          } else {
-            this.completion(null, response, null);
-          }
-        },
-        error => this.completion(null, null, error)
-      );
+    Http.request({
+      url: tokenUrl,
+      method: "POST",
+      headers: headers,
+      content: body,
+    }).then(
+      (response: HttpResponse) => {
+        if (response.statusCode !== 200) {
+          this.completion(
+            null,
+            response,
+            new Error(
+              `Failed refresh token with status ${response.statusCode}.`
+            )
+          );
+        } else {
+          this.completion(null, response, null);
+        }
+      },
+      (error) => this.completion(null, null, error)
+    );
   }
 
   private getTokenFromCode(
@@ -249,7 +246,7 @@ export class TnsOAuthClientConnection {
       params["code_verifier"] = client.codeVerifier;
     }
 
-    params['redirect_uri'] = client.provider.options.redirectUri;
+    params["redirect_uri"] = client.provider.options.redirectUri;
 
     let post_data = querystring.stringify(params);
 
@@ -261,12 +258,12 @@ export class TnsOAuthClientConnection {
 
     return new Promise<any>((resolve, reject) => {
       this._createRequest("POST", accessTokenUrl, post_headers, post_data, null)
-        .then((response: http.HttpResponse) => {
+        .then((response: HttpResponse) => {
           let tokenResult = httpResponseToToken(response);
           completion(tokenResult, <any>response);
           resolve(response);
         })
-        .catch(er => {
+        .catch((er) => {
           reject(er);
         });
     });
@@ -278,7 +275,7 @@ export class TnsOAuthClientConnection {
     headers,
     post_body,
     access_token
-  ): Promise<http.HttpResponse> {
+  ): Promise<HttpResponse> {
     const parsedUrl = URL.parse(url, true);
 
     const realHeaders = {};
@@ -314,8 +311,8 @@ export class TnsOAuthClientConnection {
     return this._executeRequest(options, url, post_body);
   }
 
-  private _executeRequest(options, url, post_body): Promise<http.HttpResponse> {
-    const promise = http.request({
+  private _executeRequest(options, url, post_body): Promise<HttpResponse> {
+    const promise = Http.request({
       url: url,
       method: options.method,
       headers: options.headers,

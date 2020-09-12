@@ -1,10 +1,13 @@
-import { Frame } from "@nativescript/core/ui/frame";
-import { WebView, LoadEventData } from "@nativescript/core/ui/web-view";
-import { android as androidApp } from "@nativescript/core/application";
-import { Page } from "@nativescript/core/ui/page";
-import { GridLayout } from "@nativescript/core/ui/layouts/grid-layout";
-import { NavigationButton } from "@nativescript/core/ui/action-bar";
-import { isAndroid } from "@nativescript/core"
+import {
+  Application,
+  Frame,
+  Page,
+  GridLayout,
+  NavigationButton,
+  WebView,
+  LoadEventData,
+} from "@nativescript/core";
+
 import {
   TnsOAuthClient,
   ITnsOAuthTokenResult,
@@ -64,10 +67,7 @@ export class TnsOAuthLoginWebViewController
     this.openUrlWithParametersCompletion(fullUrl, frame);
   }
 
-  private openUrlWithParametersCompletion(
-    fullUrl: string,
-    frame: Frame
-  ): void {
+  private openUrlWithParametersCompletion(fullUrl: string, frame: Frame): void {
     this.goToWebViewPage(frame, fullUrl);
   }
 
@@ -87,7 +87,7 @@ export class TnsOAuthLoginWebViewController
     const page = new Page();
     page.content = grid;
 
-    if (isAndroid) {
+    if (global.isAndroid) {
       page.actionBarHidden = true;
       page.on("navigatedTo", () => {
         this.setAndroidSoftInputModeToResize();
@@ -104,7 +104,10 @@ export class TnsOAuthLoginWebViewController
     }
 
     const onCancel = () => {
-      this.loginController.completeLoginWithTokenResponseError(null, new Error("User cancelled."));
+      this.loginController.completeLoginWithTokenResponseError(
+        null,
+        new Error("User cancelled.")
+      );
     };
     page.on("navigatedFrom", onCancel);
     this.unbindCancelEvent = () => page.off("navigatedFrom", onCancel);
@@ -147,8 +150,8 @@ export class TnsOAuthLoginWebViewController
         this.loginController.client.provider.options.redirectUri
       )
     ) {
-      if (isAndroid && args.object && args.object['stopLoading']) {
-        args.object['stopLoading']();
+      if (global.isAndroid && args.object && args.object["stopLoading"]) {
+        args.object["stopLoading"]();
       }
       this.resumeWithUrl(args.url);
     }
@@ -160,13 +163,13 @@ export class TnsOAuthLoginWebViewController
   private originalSoftInputMode: number;
 
   private setAndroidSoftInputModeToResize(): void {
-    const window = androidApp.foregroundActivity.getWindow();
+    const window = Application.android.foregroundActivity.getWindow();
     this.originalSoftInputMode = window.getAttributes().softInputMode;
     window.setSoftInputMode(SOFT_INPUT_ADJUST_RESIZE);
   }
 
   private restoreAndroidSoftInputMode(): void {
-    const window = androidApp.foregroundActivity.getWindow();
+    const window = Application.android.foregroundActivity.getWindow();
     window.setSoftInputMode(this.originalSoftInputMode);
   }
 }

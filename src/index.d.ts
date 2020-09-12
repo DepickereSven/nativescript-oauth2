@@ -1,7 +1,9 @@
-/// <reference path="./providers/providers.d.ts" />
-import { Frame } from "@nativescript/core/ui/frame";
-import { LoadEventData } from "@nativescript/core/ui/web-view/web-view";
-import { HttpResponse } from "@nativescript/core/http/http";
+import {
+  Application,
+  Frame,
+  HttpResponse,
+  LoadEventData,
+} from "@nativescript/core";
 import { TnsOaProvider, TnsOaProviderType } from "./providers";
 
 export declare interface ITnsOAuthTokenResult {
@@ -17,9 +19,7 @@ export type TnsOAuthClientLoginBlock = (
   tokenResult: ITnsOAuthTokenResult,
   error
 ) => void;
-export type TnsOAuthClientLogoutBlock = (
-  error
-) => void;
+export type TnsOAuthClientLogoutBlock = (error) => void;
 export type TnsOAuthPageLoadStarted = (args: LoadEventData) => void;
 export type TnsOAuthPageLoadFinished = (args: LoadEventData) => void;
 
